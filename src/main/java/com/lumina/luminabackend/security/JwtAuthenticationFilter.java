@@ -16,7 +16,9 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
-
+/**
+ * Extracts, validates, and authenticates JWT tokens for each incoming request.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -25,13 +27,19 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final UserDetailsService userDetailsService; // load user infor from db
 
     /**
-     * Main filter JWT check + authentication
+     * Main filter method, extracts JWT from header, validates it,
+     * and sets the authentication in the SecurityContext.
+     *
+     * @param request  incoming HTTP request
+     * @param response outgoing HTTP response
+     * @param filterChain filter chain for next processing
+     * @throws ServletException if a servlet error occurs
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        String token = getTokenFromRequest(request); // extract token
+        String token = getTokenFromRequest(request);
 
         if (StringUtils.hasText(token) && tokenProvider.validateToken(token)) { // validate
             String username = tokenProvider.getUsernameFromToken(token); // get user email
@@ -50,12 +58,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Extract JWT from Authorization header
+     * Extracts JWT token from Authorization header.
+     * @param request HTTP request containing the header
+     * @return JWT token string, or {@code null} if not found
      */
     private String getTokenFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization"); // get header
+        String bearerToken = request.getHeader("Authorization");
 
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) { // check Bearer
+        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             return bearerToken.substring(7); // remove prefix
         }
         return null;

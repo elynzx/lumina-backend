@@ -9,22 +9,21 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
-public class CustomUserPrincipal implements UserDetails {
+/**
+ * Adapts the User entity to Spring Security's UserDetails.
+ */
+public record CustomUserPrincipal(User user) implements UserDetails {
 
-    private final User user; // reference to User entity
-
-    public CustomUserPrincipal(User user) {
-        this.user = user;
-    }
-
+    /** Creates a CustomUserPrincipal instance from a User entity. */
     public static CustomUserPrincipal create(User user) {
         return new CustomUserPrincipal(user);
     }
 
+    /** Returns user granted authority based on role. */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Role role = user.getRole();
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase())); // user roles
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase()));
     }
 
     @Override
@@ -37,27 +36,28 @@ public class CustomUserPrincipal implements UserDetails {
         return user.getEmail();
     }
 
+    /** Checks if the account is non-expired (true = active) */
     @Override
     public boolean isAccountNonExpired() {
-        return true; // always active
+        return true;
     }
 
+    /** Checks if the account is non-locked (true = unlocked) */
     @Override
     public boolean isAccountNonLocked() {
-        return true; // not locked
+        return true;
     }
 
+    /** Checks if credentials are non-expired (true = valid) */
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // credentials valid
+        return true;
     }
 
+    /** Checks if the account is enabled and allowed to log in. */
     @Override
     public boolean isEnabled() {
-        return true; // account enabled
+        return true;
     }
 
-    public User getUser() {
-        return user;
-    }
 }
