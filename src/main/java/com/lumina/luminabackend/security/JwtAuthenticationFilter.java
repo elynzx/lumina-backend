@@ -29,11 +29,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     /**
      * Main filter method, extracts JWT from header, validates it,
      * and sets the authentication in the SecurityContext.
-     *
-     * @param request  incoming HTTP request
-     * @param response outgoing HTTP response
-     * @param filterChain filter chain for next processing
-     * @throws ServletException if a servlet error occurs
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response,
