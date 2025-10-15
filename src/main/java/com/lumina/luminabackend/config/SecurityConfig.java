@@ -56,17 +56,19 @@ public class SecurityConfig {
                         .requestMatchers("/actuator/health").permitAll()
 
                         // Public endpoints
-                        .requestMatchers(HttpMethod.GET, "/api/locales/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/distritos").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/tipos-evento").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/mobiliario").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/reservas/disponibilidad").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/reservas/calcular-presupuesto").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/venues/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/districts/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/event-types/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/furniture/**").permitAll()
+
+                        // Reservations
+                        .requestMatchers(HttpMethod.GET, "/api/reservations/availability").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/reservations/calculate-budget").permitAll()
 
                         // Customer
-                        .requestMatchers("/api/usuarios/me/**").hasRole("CLIENTE")
-                        .requestMatchers(HttpMethod.POST, "/api/reservas").hasRole("CLIENTE")
-                        .requestMatchers("/api/reservas/mis-reservas").hasRole("CLIENTE")
+                        .requestMatchers("/api/users/me/**").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.POST, "/api/reservations").hasRole("CLIENTE")
+                        .requestMatchers("/api/reservations/my-reservations").hasRole("CLIENTE")
 
                         // Admin
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
