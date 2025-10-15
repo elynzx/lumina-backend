@@ -2,32 +2,41 @@ package com.lumina.luminabackend.security;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
+
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
 
+/**
+ * Provides utility methods for generating, validating,
+ * and extracting data from JWT tokens.
+ */
 @Component
+@RequiredArgsConstructor
 public class JwtTokenProvider {
 
-    // secret key
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+    private final JwtProperties jwtProperties;
 
-    // expiration ms
-    @Value("${jwt.expiration}")
-    private long jwtExpirationInMs;
-
+    /**
+     * Generates and returns secret key used to sign JWT tokens.
+     * @return SecretKey used for HMAC SHA-256/512 signing.
+     */
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(jwtSecret.getBytes());
+        return Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
     }
 
-    // Generate token
+    /**
+     * Generates JWT token based on user details.
+     *
+     * @param authentication current authenticated user
+     * @return generated JWT token string
+     */
     public String generateToken(Authentication authentication) {
         CustomUserPrincipal userPrincipal = (CustomUserPrincipal) authentication.getPrincipal();
-        Date expiryDate = new Date(System.currentTimeMillis() + jwtExpirationInMs);
+        Date expiryDate = new Date(System.currentTimeMillis() + jwtProperties.getExpiration());
 
         return Jwts.builder()
                 .subject(userPrincipal.getUsername())
@@ -37,7 +46,12 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    // Extract username/email from token
+    /**
+     * Extracts username (email) from a JWT token.
+     *
+     * @param token JWT string
+     * @return username inside the token
+     */
     public String getUsernameFromToken(String token) {
         Claims claims = Jwts.parser()
                 .verifyWith(getSigningKey())
@@ -48,7 +62,11 @@ public class JwtTokenProvider {
         return claims.getSubject();
     }
 
-    // Validate token
+    /**
+     * Validates token and expiration date.
+     *
+     * @return true if valid, false otherwise
+     */
     public boolean validateToken(String authToken) {
         try {
             Jwts.parser()
