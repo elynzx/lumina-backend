@@ -1,5 +1,8 @@
 package com.lumina.luminabackend.entity.venue;
 
+import lombok.Getter;
+
+@Getter
 public enum VenueStatus {
     AVAILABLE("DISPONIBLE"),
     UNAVAILABLE("NO_DISPONIBLE");
@@ -10,7 +13,4 @@ public enum VenueStatus {
         this.value = value;
     }
 
-    public String getValue() {
-        return value;
-    }
 }

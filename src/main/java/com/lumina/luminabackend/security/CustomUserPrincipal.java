@@ -60,4 +60,16 @@ public record CustomUserPrincipal(User user) implements UserDetails {
         return true;
     }
 
+    public Integer getId() {
+        return user.getUserId();
+    }
+
+    public String getEmail() {
+        return user.getEmail();
+    }
+
+    public String getRoleName() {
+        return user.getRole().getRoleName();
+    }
+
 }

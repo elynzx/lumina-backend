@@ -3,6 +3,7 @@ package com.lumina.luminabackend.dto.auth;
 import lombok.*;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthResponseDTO {

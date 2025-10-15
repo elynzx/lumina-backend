@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import lombok.*;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class VenueCardDTO {
@@ -15,5 +16,5 @@ public class VenueCardDTO {
     private BigDecimal pricePerHour;
     private String description;
     private String mainPhotoUrl;
-    private String status; // AVAILABLE, UNAVAILABLE
+    private String status;
 }

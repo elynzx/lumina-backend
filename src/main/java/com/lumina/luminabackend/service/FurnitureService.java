@@ -60,7 +60,6 @@ public class FurnitureService {
     /**
      * Admin methods
      */
-
     @Transactional(readOnly = true)
     public List<AdminFurnitureDTO> findAllForAdmin() {
         return furnitureRepository.findAll()

@@ -12,7 +12,9 @@ import java.util.Optional;
 public interface DistrictRepository extends JpaRepository<District, Integer> {
 
     @Query("SELECT d.districtId, d.districtName, " +
-            "(SELECT v.mainPhotoUrl FROM Venue v WHERE v.district.districtId = d.districtId LIMIT 1) as photoUrl, " +
+            "(SELECT vp.photoUrl FROM VenuePhoto vp WHERE vp.venue.venueId IN " +
+            "(SELECT v.venueId FROM Venue v WHERE v.district.districtId = d.districtId AND v.status = 'AVAILABLE') " +
+            "ORDER BY vp.photoId ASC LIMIT 1) as photoUrl, " +
             "COUNT(v.venueId) as venueCount " +
             "FROM District d " +
             "LEFT JOIN Venue v ON d.districtId = v.district.districtId " +
@@ -23,4 +25,6 @@ public interface DistrictRepository extends JpaRepository<District, Integer> {
     List<District> findByDistrictNameContainingIgnoreCase(String name);
 
     boolean existsByDistrictNameIgnoreCase(String districtName);
+
+    List<District> findByOrderByDistrictNameAsc();
 }
