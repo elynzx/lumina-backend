@@ -1,5 +1,4 @@
 package com.lumina.luminabackend.entity.reservation;
-import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;

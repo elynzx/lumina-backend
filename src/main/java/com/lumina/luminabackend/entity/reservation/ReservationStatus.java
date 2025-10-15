@@ -1,5 +1,8 @@
 package com.lumina.luminabackend.entity.reservation;
 
+import lombok.Getter;
+
+@Getter
 public enum ReservationStatus {
     PENDING("Pendiente"),
     CONFIRMED("Confirmada"),
@@ -11,7 +14,4 @@ public enum ReservationStatus {
         this.value = value;
     }
 
-    public String getValue() {
-        return value;
-    }
 }

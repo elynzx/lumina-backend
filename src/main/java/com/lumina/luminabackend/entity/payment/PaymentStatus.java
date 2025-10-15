@@ -1,5 +1,8 @@
 package com.lumina.luminabackend.entity.payment;
 
+import lombok.Getter;
+
+@Getter
 public enum PaymentStatus {
     PENDING("Pendiente"),
     PAID("Pagado"),
@@ -11,7 +14,4 @@ public enum PaymentStatus {
         this.value = value;
     }
 
-    public String getValue() {
-        return value;
-    }
 }

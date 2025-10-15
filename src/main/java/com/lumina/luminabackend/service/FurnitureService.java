@@ -8,7 +8,6 @@ import com.lumina.luminabackend.entity.furniture.Furniture;
 import com.lumina.luminabackend.exception.ResourceNotFoundException;
 import com.lumina.luminabackend.repository.furniture.FurnitureRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +52,7 @@ public class FurnitureService {
         }
 
         Integer usedQuantity = furnitureRepository.findUsedQuantityByFurnitureAndDate(furnitureId, date);
-        Integer availableForDate = totalStock - (usedQuantity != null ? usedQuantity : 0);
+        int availableForDate = totalStock - (usedQuantity != null ? usedQuantity : 0);
 
         return availableForDate >= requestedQuantity;
     }
