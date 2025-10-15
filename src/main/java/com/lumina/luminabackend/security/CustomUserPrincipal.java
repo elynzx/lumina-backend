@@ -1,7 +1,7 @@
 package com.lumina.luminabackend.security;
 
-import com.lumina.luminabackend.entity.Role;
-import com.lumina.luminabackend.entity.User;
+import com.lumina.luminabackend.entity.user.Role;
+import com.lumina.luminabackend.entity.user.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -23,7 +23,7 @@ public record CustomUserPrincipal(User user) implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Role role = user.getRole();
-        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.getName().toUpperCase()));
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.getRoleName().toUpperCase()));
     }
 
     @Override

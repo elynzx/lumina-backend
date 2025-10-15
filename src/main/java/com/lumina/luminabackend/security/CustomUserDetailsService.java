@@ -1,7 +1,7 @@
 package com.lumina.luminabackend.security;
 
-import com.lumina.luminabackend.entity.User;
-import com.lumina.luminabackend.repository.UserRepository;
+import com.lumina.luminabackend.entity.user.User;
+import com.lumina.luminabackend.repository.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
