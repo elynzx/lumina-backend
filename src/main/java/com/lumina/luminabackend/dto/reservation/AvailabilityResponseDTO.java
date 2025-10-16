@@ -1,6 +1,7 @@
 package com.lumina.luminabackend.dto.reservation;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -9,5 +10,13 @@ import java.util.List;
 public class AvailabilityResponseDTO {
     private Boolean isAvailable;
     private String message;
-    private List<String> conflictingReservations;
+    private List<ConflictInfo> conflicts;
+
+    @Data
+    @Builder
+    public static class ConflictInfo {
+        private LocalDateTime startTime;
+        private LocalDateTime endTime;
+        private String eventType;
+    }
 }

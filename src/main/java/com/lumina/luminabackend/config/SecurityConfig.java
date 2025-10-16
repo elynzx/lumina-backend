@@ -60,15 +60,20 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/districts/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/event-types/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/furniture/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/payment-methods/**").permitAll()
 
-                        // Reservations
-                        .requestMatchers(HttpMethod.GET, "/api/reservations/availability").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/reservations/calculate-budget").permitAll()
+
+                        .requestMatchers(HttpMethod.POST, "/api/reservations/availability").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/reservations/calculate-budget").permitAll()
 
                         // Customer
                         .requestMatchers("/api/users/me/**").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.GET, "/api/users/profile/**").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.PUT, "/api/users/profile/**").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.POST, "/api/reservations").hasRole("CLIENTE")
-                        .requestMatchers("/api/reservations/my-reservations").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.GET, "/api/reservations/my-reservations").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.GET, "/api/reservations/*/details").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.PUT, "/api/reservations/*/cancel").hasRole("CLIENTE")
 
                         // Admin
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")

@@ -8,4 +8,5 @@ public class PaymentMethodDTO {
     private Integer paymentMethodId;
     private String methodName;
     private String description;
+    private Boolean active;
 }

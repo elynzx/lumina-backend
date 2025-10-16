@@ -12,7 +12,9 @@ public class PaymentDetailDTO {
     private BigDecimal amount;
     private String paymentMethod;
     private String confirmationCode;
-    private String status; // PENDING, PAID, FAILED
+    private String status;
     private LocalDateTime paymentDate;
     private String receiptUrl;
+    private String customerName;
+    private String customerEmail;
 }

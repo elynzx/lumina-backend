@@ -13,7 +13,7 @@ public class AvailabilityRequestDTO {
     private Integer venueId;
 
     @NotNull
-    private LocalDate date;
+    private LocalDate reservationDate;
 
     @NotNull
     private LocalTime startTime;

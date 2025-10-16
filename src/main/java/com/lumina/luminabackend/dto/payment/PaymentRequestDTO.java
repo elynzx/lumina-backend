@@ -19,4 +19,6 @@ public class PaymentRequestDTO {
     private BigDecimal amount;
 
     private String transactionCode;
+    private String customerName;
+    private String customerEmail;
 }
