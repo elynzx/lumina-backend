@@ -36,3 +36,4 @@ public class AuthController {
                 .body(ApiResponseDTO.success("Registro exitoso", response));
     }
 }
+
