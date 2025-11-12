@@ -41,7 +41,7 @@ VALUES ('Mesa Redonda', 'Mesa redonda para 8 personas', 50, 25.00,
        ('Iluminación LED', 'Sistema de luces LED decorativas', 15, 180.00,
         'https://images.unsplash.com/photo-1478147427282-58e87a9ce616?w=400');
 
--- ===== INSERTAR LOCALES (✅ CORREGIDO - Usar valores exactos del enum) =====
+-- ===== INSERTAR LOCALES =====
 INSERT INTO locales (nombre_local, direccion, id_distrito, aforo_maximo, precio_hora, descripcion, estado)
 VALUES ('Salón Dorado', 'Av. Pardo 123, Miraflores', 1, 200, 500.00,
         'Elegante salón con vista al mar, ideal para bodas y eventos especiales', 'AVAILABLE'),
