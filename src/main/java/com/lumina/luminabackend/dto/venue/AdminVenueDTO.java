@@ -17,7 +17,11 @@ public class AdminVenueDTO {
     private BigDecimal pricePerHour;
     private String description;
     private String mainPhotoUrl;
-    private String photos; // Comma separated URLs
-    private String availableEventTypes; // Comma separated types
+    private String photos;
+    private String availableEventTypes;
+    private String availableEventTypeIds;
     private String status;
+    private Double latitude;
+    private Double longitude;
+    private String googleMapsUrl;
 }

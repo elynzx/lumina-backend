@@ -25,6 +25,9 @@ public class EventType {
     @Column(name = "descripcion", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "url_foto", length = 255)
+    private String photoUrl;
+
     // Relationships
     @OneToMany(mappedBy = "eventType", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<VenueEventType> venueEventTypes;

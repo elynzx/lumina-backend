@@ -9,4 +9,5 @@ public class EventTypeDTO {
     private Integer eventTypeId;
     private String eventTypeName;
     private String description;
+    private String photoUrl;
 }

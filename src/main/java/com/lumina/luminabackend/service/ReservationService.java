@@ -3,6 +3,9 @@ package com.lumina.luminabackend.service;
 import com.lumina.luminabackend.dto.reservation.*;
 import com.lumina.luminabackend.entity.event.EventType;
 import com.lumina.luminabackend.entity.furniture.Furniture;
+import com.lumina.luminabackend.entity.payment.Payment;
+import com.lumina.luminabackend.entity.payment.PaymentMethod;
+import com.lumina.luminabackend.entity.payment.PaymentStatus;
 import com.lumina.luminabackend.entity.reservation.Reservation;
 import com.lumina.luminabackend.entity.reservation.ReservationFurniture;
 import com.lumina.luminabackend.entity.reservation.ReservationStatus;
@@ -11,6 +14,8 @@ import com.lumina.luminabackend.entity.venue.Venue;
 import com.lumina.luminabackend.entity.venue.VenuePhoto;
 import com.lumina.luminabackend.repository.event.EventTypeRepository;
 import com.lumina.luminabackend.repository.furniture.FurnitureRepository;
+import com.lumina.luminabackend.repository.payment.PaymentMethodRepository;
+import com.lumina.luminabackend.repository.payment.PaymentRepository;
 import com.lumina.luminabackend.repository.reservation.ReservationRepository;
 import com.lumina.luminabackend.repository.reservation.ReservationFurnitureRepository;
 import com.lumina.luminabackend.repository.venue.VenueRepository;
@@ -38,6 +43,9 @@ public class ReservationService {
     private final VenueRepository venueRepository;
     private final EventTypeRepository eventTypeRepository;
     private final FurnitureRepository furnitureRepository;
+    private final PaymentRepository paymentRepository;
+    private final PaymentMethodRepository paymentMethodRepository;
+    private final SecurityUtils securityUtils;
 
     public boolean checkAvailability(AvailabilityRequestDTO request) {
         List<Reservation> conflictingReservations = reservationRepository
@@ -58,7 +66,7 @@ public class ReservationService {
                 .orElseThrow(() -> new RuntimeException("Venue no encontrado"));
 
         Duration duration = Duration.between(request.getStartTime(), request.getEndTime());
-        int totalHours = Math.max(1, (int) duration.toHours()); // Mínimo 1 hora
+        int totalHours = Math.max(1, (int) duration.toHours());
 
         BigDecimal venueCost = venue.getPricePerHour().multiply(BigDecimal.valueOf(totalHours));
 
@@ -117,8 +125,7 @@ public class ReservationService {
     @Transactional
     public ReservationResponseDTO createReservation(ReservationRequestDTO request) {
 
-        User currentUser = SecurityUtils.getCurrentUser();
-
+        User currentUser = securityUtils.getCurrentUser();
 
         AvailabilityRequestDTO availabilityCheck = new AvailabilityRequestDTO();
         availabilityCheck.setVenueId(request.getVenueId());
@@ -127,11 +134,11 @@ public class ReservationService {
         availabilityCheck.setEndTime(request.getEndTime());
 
         if (!checkAvailability(availabilityCheck)) {
-            throw new RuntimeException("El venue ya no está disponible en esa fecha/hora");
+            throw new RuntimeException("El local ya no está disponible en esa fecha/hora");
         }
 
         Venue venue = venueRepository.findById(request.getVenueId())
-                .orElseThrow(() -> new RuntimeException("Venue no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Local no encontrado"));
 
         EventType eventType = eventTypeRepository.findById(request.getEventTypeId())
                 .orElseThrow(() -> new RuntimeException("Tipo de evento no encontrado"));
@@ -142,6 +149,17 @@ public class ReservationService {
                     ") excede la capacidad máxima del venue (" + venue.getMaxCapacity() + ")");
         }
 
+        ReservationStatus status = ReservationStatus.PENDING;
+        PaymentMethod paymentMethod = null;
+
+        if (request.getPaymentMethodId() != null) {
+            paymentMethod = paymentMethodRepository.findById(request.getPaymentMethodId())
+                    .orElseThrow(() -> new RuntimeException("Método de pago no encontrado"));
+
+            if (!paymentMethod.getMethodName().equalsIgnoreCase("Transferencia")) {
+                status = ReservationStatus.CONFIRMED;
+            }
+        }
 
         Reservation reservation = Reservation.builder()
                 .user(currentUser)
@@ -154,7 +172,7 @@ public class ReservationService {
                 .venueCost(request.getVenueCost())
                 .furnitureCost(request.getFurnitureCost() != null ? request.getFurnitureCost() : BigDecimal.ZERO)
                 .totalCost(request.getTotalCost())
-                .status(ReservationStatus.PENDING)
+                .status(status)
                 .createdAt(LocalDateTime.now())
                 .build();
 
@@ -191,11 +209,36 @@ public class ReservationService {
             }
         }
 
+        if (request.getPaymentMethodId() != null) {
+            if (paymentMethod == null) {
+                paymentMethod = paymentMethodRepository.findById(request.getPaymentMethodId())
+                        .orElseThrow(() -> new RuntimeException("Método de pago no encontrado"));
+            }
+
+            PaymentStatus paymentStatus = PaymentStatus.PENDING;
+            if (paymentMethod.getMethodName().equalsIgnoreCase("Tarjeta") ||
+                    paymentMethod.getMethodName().equalsIgnoreCase("PagoEfectivo")) {
+                paymentStatus = PaymentStatus.PAID;
+            }
+
+            Payment payment = Payment.builder()
+                    .reservation(reservation)
+                    .paymentMethod(paymentMethod)
+                    .amount(request.getTotalCost())
+                    .status(paymentStatus)
+                    .paymentDate(LocalDateTime.now())
+                    .confirmationCode(null)
+                    .receiptUrl(request.getPaymentReceiptUrl())
+                    .build();
+
+            paymentRepository.save(payment);
+        }
+
         return mapToResponseDTO(reservation);
     }
 
     public List<ReservationResponseDTO> getMyReservations() {
-        User currentUser = SecurityUtils.getCurrentUser();
+        User currentUser = securityUtils.getCurrentUser();
 
         List<Reservation> reservations = reservationRepository
                 .findByUserOrderByCreatedAtDesc(currentUser);
@@ -206,7 +249,7 @@ public class ReservationService {
     }
 
     public ReservationSuccessDTO getReservationDetails(Integer reservationId) {
-        User currentUser = SecurityUtils.getCurrentUser();
+        User currentUser = securityUtils.getCurrentUser();
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
@@ -225,7 +268,7 @@ public class ReservationService {
         if (reservation.getVenue().getPhotos() != null) {
             venuePhotos = reservation.getVenue().getPhotos().stream()
                     .map(VenuePhoto::getPhotoUrl)
-                    .limit(3) // Máximo 3 fotos
+                    .limit(3)
                     .collect(Collectors.toList());
         }
 
@@ -248,7 +291,7 @@ public class ReservationService {
                 .customerEmail(currentUser.getEmail())
                 .customerPhone(currentUser.getPhone())
                 .costBreakdown(buildCostBreakdown(reservation))
-                .furnitureItems(buildFurnitureItemsFromRepository(reservationId)) // 🔥 USANDO REPOSITORY
+                .furnitureItems(buildFurnitureItemsFromRepository(reservationId))
                 .paymentInfo(buildPaymentInfo(reservation))
                 .build();
     }
@@ -256,7 +299,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponseDTO cancelReservation(Integer reservationId) {
-        User currentUser = SecurityUtils.getCurrentUser();
+        User currentUser = securityUtils.getCurrentUser();
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new RuntimeException("Reserva no encontrada"));
@@ -291,6 +334,15 @@ public class ReservationService {
                         .build())
                 .collect(Collectors.toList());
 
+        String paymentReceiptUrl = null;
+        String paymentMethodName = null;
+
+        if (reservation.getPayments() != null && !reservation.getPayments().isEmpty()) {
+            Payment lastPayment = reservation.getPayments().get(0);
+            paymentReceiptUrl = lastPayment.getReceiptUrl();
+            paymentMethodName = lastPayment.getPaymentMethod().getMethodName();
+        }
+
         return ReservationResponseDTO.builder()
                 .reservationId(reservation.getReservationId())
                 .reservationDate(reservation.getReservationDate())
@@ -307,6 +359,8 @@ public class ReservationService {
                 .venueAddress(reservation.getVenue().getAddress())
                 .eventTypeId(reservation.getEventType().getEventTypeId())
                 .eventTypeName(reservation.getEventType().getEventTypeName())
+                .paymentReceiptUrl(paymentReceiptUrl)
+                .paymentMethodName(paymentMethodName)
                 .furnitureItems(furnitureDTOs)
                 .build();
     }
@@ -337,11 +391,11 @@ public class ReservationService {
 
         return furnitureDetails.stream()
                 .map(row -> ReservationSuccessDTO.FurnitureItemDetail.builder()
-                        .furnitureName((String) row[1])       // f.furnitureName
-                        .quantity((Integer) row[2])           // rf.quantity
-                        .unitPrice((BigDecimal) row[3])       // rf.unitPrice
-                        .subtotal((BigDecimal) row[4])        // rf.subtotal
-                        .photoUrl((String) row[5])            // f.photoUrl
+                        .furnitureName((String) row[1])
+                        .quantity((Integer) row[2])
+                        .unitPrice((BigDecimal) row[3])
+                        .subtotal((BigDecimal) row[4])
+                        .photoUrl((String) row[5])
                         .build())
                 .collect(Collectors.toList());
     }

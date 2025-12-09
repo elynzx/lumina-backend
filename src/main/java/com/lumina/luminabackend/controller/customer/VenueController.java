@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -43,18 +44,33 @@ public class VenueController {
             @RequestParam(required = false) Integer districtId,
             @RequestParam(required = false) Integer eventTypeId,
             @RequestParam(required = false) Integer minCapacity,
+            @RequestParam(required = false) Integer maxCapacity,
             @RequestParam(required = false) BigDecimal minPrice,
             @RequestParam(required = false) BigDecimal maxPrice
     ) {
+        System.out.println("districtId: " + districtId);
+        System.out.println("eventTypeId: " + eventTypeId);
+        System.out.println("minCapacity: " + minCapacity);
+        System.out.println("maxCapacity: " + maxCapacity);
+        System.out.println("minPrice: " + minPrice);
+        System.out.println("maxPrice: " + maxPrice);
+
         VenueFilterDTO filters = VenueFilterDTO.builder()
                 .districtId(districtId)
                 .eventTypeId(eventTypeId)
                 .minCapacity(minCapacity)
+                .maxCapacity(maxCapacity)
                 .minPrice(minPrice)
                 .maxPrice(maxPrice)
                 .build();
 
         List<VenueCardDTO> venues = venueService.searchWithFilters(filters);
         return ResponseEntity.ok(ApiResponseDTO.success("Búsqueda completada", venues));
+    }
+
+    @GetMapping("/{id}/unavailable-dates")
+    public ResponseEntity<ApiResponseDTO<List<LocalDate>>> getUnavailableDates(@PathVariable Integer id) {
+        List<LocalDate> unavailableDates = venueService.getUnavailableDates(id);
+        return ResponseEntity.ok(ApiResponseDTO.success("Fechas no disponibles obtenidas", unavailableDates));
     }
 }

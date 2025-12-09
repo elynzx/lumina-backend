@@ -19,6 +19,9 @@ public class ReservationRequestDTO {
     private BigDecimal furnitureCost;
     private BigDecimal totalCost;
     private List<FurnitureItemRequestDTO> furnitureItems;
+    private Integer paymentMethodId;
+    private String approvalCode;
+    private String paymentReceiptUrl;
 
     @Data
     public static class FurnitureItemRequestDTO {

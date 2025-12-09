@@ -11,6 +11,7 @@ public class VenueFilterDTO {
     private Integer districtId;
     private Integer eventTypeId;
     private Integer minCapacity;
+    private Integer maxCapacity;
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
 }

@@ -33,4 +33,8 @@ public class UpdateVenueDTO {
 
     @Pattern(regexp = "AVAILABLE|UNAVAILABLE", message = "El estado debe ser AVAILABLE o UNAVAILABLE")
     private String status;
+
+    private Double latitude;
+    private Double longitude;
+    private String googleMapsUrl;
 }

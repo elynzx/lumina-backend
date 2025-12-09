@@ -3,17 +3,22 @@ package com.lumina.luminabackend.service;
 
 import com.lumina.luminabackend.dto.venue.*;
 import com.lumina.luminabackend.entity.district.District;
+import com.lumina.luminabackend.entity.reservation.Reservation;
 import com.lumina.luminabackend.entity.venue.Venue;
-import com.lumina.luminabackend.entity.venue.VenuePhoto;
+
 import com.lumina.luminabackend.entity.venue.VenueStatus;
+import com.lumina.luminabackend.entity.reservation.ReservationStatus;
 import com.lumina.luminabackend.exception.DuplicateResourceException;
 import com.lumina.luminabackend.exception.ResourceNotFoundException;
+import com.lumina.luminabackend.exception.BusinessException;
 import com.lumina.luminabackend.repository.district.DistrictRepository;
 import com.lumina.luminabackend.repository.venue.VenueRepository;
+import com.lumina.luminabackend.repository.reservation.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +29,7 @@ public class VenueService {
 
     private final VenueRepository venueRepository;
     private final DistrictRepository districtRepository;
+    private final ReservationRepository reservationRepository;
 
     /**
      * Client methods
@@ -54,26 +60,70 @@ public class VenueService {
 
     @Transactional(readOnly = true)
     public List<VenueCardDTO> searchWithFilters(VenueFilterDTO filters) {
-        return venueRepository.findWithFilters(
-                VenueStatus.AVAILABLE,
-                        filters.getDistrictId(),
-                        filters.getEventTypeId(),
-                        filters.getMinCapacity(),
-                        filters.getMinPrice(),
-                        filters.getMaxPrice()
-                ).stream()
+        List<Venue> venues;
+
+        if (filters.getEventTypeId() != null) {
+            venues = venueRepository.findWithEventTypeFilter(
+                    VenueStatus.AVAILABLE,
+                    filters.getDistrictId(),
+                    filters.getEventTypeId(),
+                    filters.getMinCapacity(),
+                    filters.getMaxCapacity(),
+                    filters.getMinPrice(),
+                    filters.getMaxPrice()
+            );
+        } else {
+            venues = venueRepository.findWithoutEventTypeFilter(
+                    VenueStatus.AVAILABLE,
+                    filters.getDistrictId(),
+                    filters.getMinCapacity(),
+                    filters.getMaxCapacity(),
+                    filters.getMinPrice(),
+                    filters.getMaxPrice()
+            );
+        }
+
+        if (!venues.isEmpty()) {
+            List<Integer> venueIds = venues.stream()
+                    .map(Venue::getVenueId)
+                    .toList();
+
+            venueRepository.loadEventTypesByVenueIds(venueIds);
+        }
+
+        return venues.stream()
                 .map(this::convertToCardDTO)
                 .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
+    public List<LocalDate> getUnavailableDates(Integer venueId) {
+        if (!venueRepository.existsById(venueId)) {
+            throw new ResourceNotFoundException("Local no encontrado con ID: " + venueId);
+        }
+
+        return reservationRepository.findByVenueVenueIdAndStatusIn(
+                        venueId,
+                        List.of(ReservationStatus.CONFIRMED, ReservationStatus.PENDING)
+                ).stream()
+                .map(Reservation::getReservationDate)
+                .distinct()
+                .collect(Collectors.toList());
+    }
 
     /**
      * Admin methods
      */
     @Transactional(readOnly = true)
     public List<AdminVenueDTO> findAllForAdmin() {
-        return venueRepository.findAllWithDetails()
-                .stream()
+
+        List<Venue> venues = venueRepository.findAllWithDetails();
+
+        if (!venues.isEmpty()) {
+            venueRepository.findAllWithEventTypes();
+        }
+
+        return venues.stream()
                 .map(this::convertToAdminDTO)
                 .collect(Collectors.toList());
     }
@@ -82,6 +132,9 @@ public class VenueService {
     public AdminVenueDTO findByIdForAdmin(Integer id) {
         Venue venue = venueRepository.findByIdWithDetails(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Local no encontrado con ID: " + id));
+
+        venueRepository.findByIdWithEventTypes(id);
+
         return convertToAdminDTO(venue);
     }
 
@@ -108,6 +161,9 @@ public class VenueService {
                 .maxCapacity(createDTO.getMaxCapacity())
                 .pricePerHour(createDTO.getPricePerHour())
                 .description(createDTO.getDescription())
+                .latitude(createDTO.getLatitude())
+                .longitude(createDTO.getLongitude())
+                .googleMapsUrl(createDTO.getGoogleMapsUrl())
                 .status(VenueStatus.AVAILABLE)
                 .build();
 
@@ -147,7 +203,17 @@ public class VenueService {
         if (updateDTO.getDescription() != null) {
             venue.setDescription(updateDTO.getDescription());
         }
+        if (updateDTO.getLatitude() != null) {
+            venue.setLatitude(updateDTO.getLatitude());
+        }
 
+        if (updateDTO.getLongitude() != null) {
+            venue.setLongitude(updateDTO.getLongitude());
+        }
+
+        if (updateDTO.getGoogleMapsUrl() != null) {
+            venue.setGoogleMapsUrl(updateDTO.getGoogleMapsUrl());
+        }
         if (updateDTO.getStatus() != null) {
             venue.setStatus(VenueStatus.valueOf(updateDTO.getStatus()));
         }
@@ -159,6 +225,17 @@ public class VenueService {
         if (!venueRepository.existsById(id)) {
             throw new ResourceNotFoundException("Local no encontrado con ID: " + id);
         }
+
+        long confirmedReservations = reservationRepository.countByVenueVenueIdAndStatus(id, ReservationStatus.CONFIRMED);
+        if (confirmedReservations > 0) {
+            throw new BusinessException("No se puede eliminar el local porque tiene " + confirmedReservations + " reserva(s) confirmada(s)");
+        }
+
+        long pendingReservations = reservationRepository.countByVenueVenueIdAndStatus(id, ReservationStatus.PENDING);
+        if (pendingReservations > 0) {
+            throw new BusinessException("No se puede eliminar el local porque tiene " + pendingReservations + " reserva(s) pendiente(s)");
+        }
+
         venueRepository.deleteById(id);
     }
 
@@ -190,6 +267,9 @@ public class VenueService {
                 .fullDescription(venue.getDescription())
                 .photos(getAllPhotos(venue))
                 .availableEventTypes(getEventTypes(venue))
+                .latitude(venue.getLatitude())
+                .longitude(venue.getLongitude())
+                .googleMapsUrl(venue.getGoogleMapsUrl())
                 .status(venue.getStatus().getValue())
                 .build();
     }
@@ -215,6 +295,10 @@ public class VenueService {
                 .mainPhotoUrl(getMainPhoto(venue))
                 .photos(String.join(",", getAllPhotos(venue)))
                 .availableEventTypes(String.join(",", getEventTypes(venue)))
+                .availableEventTypeIds(String.join(",", getEventTypeIds(venue)))
+                .latitude(venue.getLatitude())
+                .longitude(venue.getLongitude())
+                .googleMapsUrl(venue.getGoogleMapsUrl())
                 .status(venue.getStatus().name())
                 .build();
     }
@@ -244,6 +328,15 @@ public class VenueService {
         }
         return venue.getVenueEventTypes().stream()
                 .map(vet -> vet.getEventType().getEventTypeName())
+                .collect(Collectors.toList());
+    }
+
+    private List<String> getEventTypeIds(Venue venue) {
+        if (venue.getVenueEventTypes() == null || venue.getVenueEventTypes().isEmpty()) {
+            return List.of();
+        }
+        return venue.getVenueEventTypes().stream()
+                .map(vet -> String.valueOf(vet.getEventType().getEventTypeId()))
                 .collect(Collectors.toList());
     }
 }

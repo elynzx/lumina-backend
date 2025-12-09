@@ -13,4 +13,7 @@ public class UpdateEventTypeDTO {
 
     @Size(max = 500, message = "La descripción no puede exceder 500 caracteres")
     private String description;
+
+    @Size(max = 255, message = "La URL de foto no debe superar 255 caracteres")
+    private String photoUrl;
 }

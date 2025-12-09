@@ -39,6 +39,15 @@ public class Venue {
     @Column(name = "estado")
     private VenueStatus status;
 
+    @Column(name = "latitud")
+    private Double latitude;
+
+    @Column(name = "longitud")
+    private Double longitude;
+
+    @Column(name = "url_google_maps", length = 500)
+    private String googleMapsUrl;
+
     // Relationships
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_distrito", nullable = false)

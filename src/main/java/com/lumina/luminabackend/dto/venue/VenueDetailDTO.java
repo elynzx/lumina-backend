@@ -20,4 +20,7 @@ public class VenueDetailDTO {
     private List<String> availableEventTypes;
     private List<VenueServiceDTO> services;
     private String status;
+    private Double latitude;
+    private Double longitude;
+    private String googleMapsUrl;
 }

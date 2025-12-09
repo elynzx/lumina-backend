@@ -11,7 +11,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -32,11 +31,11 @@ public class UserController {
     public ResponseEntity<ApiResponseDTO<UserProfileDTO>> updateMyProfile(
             @AuthenticationPrincipal CustomUserPrincipal userPrincipal,
             @Valid @RequestBody UpdateUserProfileDTO updateDTO) {
-            UserProfileDTO updatedProfile = userService.updateUserProfile(
-                    userPrincipal.getId(),
-                    updateDTO
-            );
-            return ResponseEntity.ok(ApiResponseDTO.success("Perfil actualizado correctamente", updatedProfile));
+        UserProfileDTO updatedProfile = userService.updateUserProfile(
+                userPrincipal.getId(),
+                updateDTO
+        );
+        return ResponseEntity.ok(ApiResponseDTO.success("Perfil actualizado correctamente", updatedProfile));
     }
 
     @PutMapping("/me/change-password")

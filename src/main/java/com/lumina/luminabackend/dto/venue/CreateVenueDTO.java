@@ -32,6 +32,10 @@ public class CreateVenueDTO {
     @Size(max = 1000, message = "La descripción no puede exceder 1000 caracteres")
     private String description;
 
+    private Double latitude;
+    private Double longitude;
+    private String googleMapsUrl;
+
     @NotBlank(message = "La foto principal es obligatoria")
     private String mainPhotoUrl;
 

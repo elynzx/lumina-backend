@@ -74,6 +74,7 @@ public class EventTypeService {
         EventType eventType = EventType.builder()
                 .eventTypeName(createDTO.getEventTypeName())
                 .description(createDTO.getDescription())
+                .photoUrl(createDTO.getPhotoUrl())
                 .build();
 
         return convertToAdminDTO(eventTypeRepository.save(eventType));
@@ -95,7 +96,9 @@ public class EventTypeService {
         if (updateDTO.getDescription() != null) {
             eventType.setDescription(updateDTO.getDescription());
         }
-
+        if (updateDTO.getPhotoUrl() != null) {
+            eventType.setPhotoUrl(updateDTO.getPhotoUrl());
+        }
         return convertToAdminDTO(eventTypeRepository.save(eventType));
     }
 
@@ -114,6 +117,7 @@ public class EventTypeService {
                 .eventTypeId(eventType.getEventTypeId())
                 .eventTypeName(eventType.getEventTypeName())
                 .description(eventType.getDescription())
+                .photoUrl(eventType.getPhotoUrl())
                 .build();
     }
 
@@ -122,6 +126,7 @@ public class EventTypeService {
                 .eventTypeId(eventType.getEventTypeId())
                 .eventTypeName(eventType.getEventTypeName())
                 .description(eventType.getDescription())
+                .photoUrl(eventType.getPhotoUrl())
                 .build();
     }
 }
