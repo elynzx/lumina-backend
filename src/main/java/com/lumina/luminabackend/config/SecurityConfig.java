@@ -2,7 +2,7 @@ package com.lumina.luminabackend.config;
 
 import com.lumina.luminabackend.security.JwtAuthenticationEntryPoint;
 import com.lumina.luminabackend.security.JwtAuthenticationFilter;
-import jakarta.servlet.http.HttpServletRequest;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
