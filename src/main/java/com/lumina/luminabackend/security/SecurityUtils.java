@@ -2,20 +2,25 @@ package com.lumina.luminabackend.security;
 
 import com.lumina.luminabackend.entity.user.User;
 import com.lumina.luminabackend.repository.user.UserRepository;
-import lombok.RequiredArgsConstructor;
+import jakarta.annotation.PostConstruct;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 @Component
-@RequiredArgsConstructor
 public class SecurityUtils {
 
+    private final UserRepository userRepositoryInstance;
     private static UserRepository userRepository;
 
     public SecurityUtils(UserRepository userRepository) {
-        SecurityUtils.userRepository = userRepository;
+        this.userRepositoryInstance = userRepository;
+    }
+
+    @PostConstruct
+    public void init() {
+        userRepository = this.userRepositoryInstance;
     }
 
     public static User getCurrentUser() {
