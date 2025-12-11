@@ -167,7 +167,6 @@ public class DashboardService {
     private List<DashboardStatsDTO.VenuePopularity> getTopVenues() {
         List<Object[]> results = reservationRepository.findTopVenuesByReservationCount();
         return results.stream()
-                .limit(5)
                 .map(result -> DashboardStatsDTO.VenuePopularity.builder()
                         .venueName((String) result[0])
                         .reservationCount((Long) result[1])
