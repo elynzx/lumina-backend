@@ -26,5 +26,4 @@ public interface DistrictRepository extends JpaRepository<District, Integer> {
 
     boolean existsByDistrictNameIgnoreCase(String districtName);
 
-    List<District> findByOrderByDistrictNameAsc();
 }

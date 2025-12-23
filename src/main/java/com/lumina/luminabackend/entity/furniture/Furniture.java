@@ -20,7 +20,7 @@ public class Furniture {
     @Column(name = "id_mobiliario")
     private Integer furnitureId;
 
-    @Column(name = "nombre", nullable = false, length = 100)
+    @Column(name = "nombre", nullable = false, unique = true, length = 100)
     private String furnitureName;
 
     @Column(name = "descripcion", columnDefinition = "TEXT")

@@ -20,7 +20,7 @@ public class Venue {
     @Column(name = "id_local")
     private Integer venueId;
 
-    @Column(name = "nombre_local", nullable = false, length = 150)
+    @Column(name = "nombre_local", nullable = false, unique = true, length = 150)
     private String venueName;
 
     @Column(name = "direccion", nullable = false, length = 255)

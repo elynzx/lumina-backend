@@ -13,5 +13,4 @@ public interface EventTypeRepository extends JpaRepository<EventType, Integer> {
 
     boolean existsByEventTypeNameIgnoreCase(String eventTypeName);
 
-    List<EventType> findByOrderByEventTypeName();
 }

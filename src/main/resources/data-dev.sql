@@ -1,7 +1,8 @@
 -- ===== INSERTAR ROLES =====
 INSERT INTO roles (nombre_rol, descripcion)
 VALUES ('ADMIN', 'Administrador del sistema con acceso completo'),
-       ('CLIENTE', 'Cliente que puede hacer reservas y gestionar su perfil');
+       ('CLIENTE', 'Cliente que puede hacer reservas y gestionar su perfil')
+ON CONFLICT (nombre_rol) DO NOTHING;
 
 -- ===== INSERTAR DISTRITOS =====
 INSERT INTO distritos (nombre_distrito)
@@ -10,7 +11,8 @@ VALUES ('Miraflores'),
        ('Surco'),
        ('La Molina'),
        ('Barranco'),
-       ('San Borja');
+       ('San Borja')
+ON CONFLICT (nombre_distrito) DO NOTHING;
 
 -- ===== INSERTAR TIPOS DE EVENTO =====
 INSERT INTO tipos_evento (nombre_tipo, descripcion, url_foto)
@@ -25,7 +27,8 @@ VALUES ('Boda', 'Ceremonias matrimoniales y recepciones',
        ('Graduación', 'Ceremonias de graduación',
         'https://images.unsplash.com/photo-1599943821034-8cb5c7526922?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=759'),
        ('Corporativo', 'Eventos empresariales',
-        'https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170');
+        'https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170')
+ON CONFLICT (nombre_tipo) DO NOTHING;
 
 -- ===== INSERTAR MOBILIARIOS =====
 INSERT INTO mobiliario (nombre, descripcion, stock_total, precio_unitario, url_foto)
@@ -46,9 +49,10 @@ VALUES ('Mesa Redonda', 'Mesa redonda modelo Cavari para 10 personas', 50, 25.00
        ('Fotografía y Video', 'Cobertura completa + edición', 10000, 2500.00,
         'https://images.unsplash.com/photo-1541515929569-1771522cbaa9?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D'),
        ('Servicios obligatorios', 'Servicio de limpieza, seguridad y garantía', 10000, 1650.00,
-        'https://static.vecteezy.com/system/resources/previews/002/389/448/non_2x/cleaning-service-black-glyph-icon-vector.jpg');
+        'https://static.vecteezy.com/system/resources/previews/002/389/448/non_2x/cleaning-service-black-glyph-icon-vector.jpg')
+ON CONFLICT (nombre) DO NOTHING;
 
--- ===== INSERTAR LOCALES (✅ CORREGIDO - Con ubicación geográfica) =====
+-- ===== INSERTAR LOCALES =====
 INSERT INTO locales (nombre_local, direccion, id_distrito, aforo_maximo, precio_hora, descripcion, estado, latitud,
                      longitud, url_google_maps)
 VALUES ('Salón Dorado', 'Av. Pardo 123, Miraflores', 1, 200, 500.00,
@@ -74,7 +78,8 @@ VALUES ('Salón Dorado', 'Av. Pardo 123, Miraflores', 1, 200, 500.00,
         'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3900.9968505005206!2d-77.024890!3d-12.118456!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105c8d4d4d4d4d5%3A0x0!2sMiraflores%2C%20Lima!5e0!3m2!1ses!2spe!4v1234567890'),
        ('Loft Industrial', 'Av. Brasil 678, San Isidro', 2, 90, 320.00, 'Espacio industrial moderno con estilo urbano',
         'AVAILABLE', -12.087654, -77.034567,
-        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.2568505005206!2d-77.034567!3d-12.087654!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105c8d4d4d4d4d5%3A0x0!2sSan%20Isidro%2C%20Lima!5e0!3m2!1ses!2spe!4v1234567890');
+        'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3901.2568505005206!2d-77.034567!3d-12.087654!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x9105c8d4d4d4d4d5%3A0x0!2sSan%20Isidro%2C%20Lima!5e0!3m2!1ses!2spe!4v1234567890')
+ON CONFLICT (nombre_local) DO NOTHING;
 
 -- ===== INSERTAR FOTOS DE LOCALES =====
 INSERT INTO fotos_locales (id_local, url_foto, descripcion)
@@ -151,7 +156,8 @@ VALUES
  'Estilo industrial'),
 (8,
  'https://plus.unsplash.com/premium_photo-1664530452361-9f86e38784b8?q=80&w=686&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
- 'Estilo industrial');
+ 'Estilo industrial')
+ON CONFLICT DO NOTHING;
 
 -- ===== RELACIONES LOCAL-TIPO EVENTO =====
 INSERT INTO local_tipo_evento (id_local, id_tipo_evento)
@@ -179,9 +185,11 @@ VALUES
 -- Loft Industrial (boda, conciertos, corporativo)
 (8, 1),
 (8, 4),
-(8, 6);
+(8, 6)
+ON CONFLICT DO NOTHING;
 
 INSERT INTO metodos_pago (nombre_metodo, descripcion)
 VALUES ('Tarjeta', 'Pago con tarjeta de crédito o débito'),
        ('Transferencia', 'Pago mediante transferencia bancaria con comprobante'),
-       ('PagoEfectivo', 'Pago en efectivo con código generado');
+       ('PagoEfectivo', 'Pago en efectivo con código generado')
+ON CONFLICT (nombre_metodo) DO NOTHING;

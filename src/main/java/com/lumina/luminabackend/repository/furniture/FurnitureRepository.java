@@ -15,11 +15,6 @@ public interface FurnitureRepository extends JpaRepository<Furniture, Integer> {
     @Query("SELECT f FROM Furniture f WHERE f.totalStock > 0")
     List<Furniture> findAvailable();
 
-    @Query("SELECT f FROM Furniture f WHERE f.totalStock > 0 ORDER BY f.furnitureName")
-    List<Furniture> findAvailableFurniture();
-
-    List<Furniture> findByOrderByFurnitureNameAsc();
-
     List<Furniture> findByFurnitureNameContainingIgnoreCase(String name);
 
     @Query("SELECT f.totalStock FROM Furniture f WHERE f.furnitureId = :furnitureId")
